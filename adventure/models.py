@@ -4,10 +4,18 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import uuid
+import random
 
 class Room(models.Model):
     title = models.CharField(max_length=50, default="DEFAULT TITLE")
     description = models.CharField(max_length=500, default="DEFAULT DESCRIPTION")
+    # add other columns for both x and y axis
+    x = models.IntegerField(default=0)
+    y = models.IntegerField(default=0)
+
+    # choose a room type
+    room_type = models.IntegerField(default=0)
+
     n_to = models.IntegerField(default=0)
     s_to = models.IntegerField(default=0)
     e_to = models.IntegerField(default=0)
@@ -35,6 +43,14 @@ class Room(models.Model):
         return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
     def playerUUIDs(self, currentPlayerID):
         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
+
+    def randRoom(self):
+        # choose a random number to assign between 0, 3
+        self.room_type = random.randint(1, 3)
+
+        return self.room_type
+        # # save new value
+        # self.save();
 
 
 class Player(models.Model):
