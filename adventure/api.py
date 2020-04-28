@@ -22,29 +22,34 @@ def generateWorld(request):
 
     # iterating over each column
     for y in range(0, len(grid)):
+        # for each column check each cell in the row
         for x in range(0, len(grid)):
+            # if cell is not empty
             if grid[y][x] != 0:
+                # move to the next cell
                 continue
 
+            # create new instance of room
             new_room = Room(
                 title="Outside Cave Entrance",
                 description="North of you, the cave mount beckons",
                 x=x,
                 y=y)
+            # generate a random shape between 1 and 3
             chosen_type = new_room.randRoom()
 
+            # save instance of room in database
             new_room.save()
 
             shape_not_found = True
-            # while true iterate
+            # while shape is not found iterate
             while shape_not_found:                
                 # if chosen type is 1
                 if chosen_type == 1:
-                    # place on grid
+                    # place on grid the room id
                     grid[y][x] = new_room.id
+                    # exit loop
                     shape_not_found = False
-                    # maybe ?  save >> new_room.save()
-                    # or this at the end grid.save()
 
                 # chosen type is equal to 2 [][]
                 if chosen_type == 2:   
@@ -61,11 +66,11 @@ def generateWorld(request):
                             chosen_type = 3
                     # if is available
                     else:
-                        # place in reserved the next value {'room_id': (x + 1, y)}
-
                         # place room in grid
                         grid[y][x] = new_room.id
+                        # assign to the very next room the same id
                         grid[y][x+1] = new_room.id
+                        # exit loop
                         shape_not_found = False
 
                 # if chose type is 3 []
@@ -82,13 +87,14 @@ def generateWorld(request):
                             chosen_type = 2
                     # if within 
                     else:
-                        # place in reserved the next value {'room_id': (x, y + 1)}
-
                         # place room in grid
                         grid[y][x] = new_room.id
+                        # give to the next room the same room id
                         grid[y+1][x] = new_room.id
+                        # close while loop
                         shape_not_found = False
-                
+
+    # return grid in response         
     return JsonResponse({'map': grid }, safe=True)
 
 
@@ -146,47 +152,3 @@ def move(request):
 def say(request):
     # IMPLEMENT
     return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
-
-
-# # generate grid size 
-# used_grid_cells = []
-
-# # maybe get from the user request the size of the maze, 100 or 500??
-
-# # clear previously generated world >> (i.e. using - Room.objects.all().delete())
-
-# for i in range(0, 100):
-
-
-#     found=False
-#     # while loop until it finds free space in grid
-#     if not in user_grid_cells:
-#         # place 
-#     else: 
-#         # generate new randomInt x and y 
-#             # if this shape 
-#             # once found free cells 
-#                 # found=True
-#                 # place in used_grid_cell
-#                 return room
-        
-
-#     # choose a random type of room to generate within instantiation
-
-#     # create new intance of the room, with all necessary properties
-
-#     # add all properties, like a randomized title and description
-
-#     # save room at each iteration on the matrix using >> .save()
-
-# # iterate over matrix once more and create connections between rooms using a corridor
-#     # use both x,y axis and see if when room is reached if it has
-#     # already a connection on that cardinal point or not
-#         # if not connect
-#         # else try changing direction
-#             # if possible make connection
-#             # else try opposite direction
-#             # if not possible maybe connect also to previously connected room?
-
-# # return JSON version serialized version of the world to the client
-# # research how to return serialized dictionaries, etc..
