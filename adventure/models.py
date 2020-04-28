@@ -47,10 +47,8 @@ class Room(models.Model):
     def randRoom(self):
         # choose a random number to assign between 0, 3
         self.room_type = random.randint(1, 3)
-
+        # and return 
         return self.room_type
-        # # save new value
-        # self.save();
 
 
 class Player(models.Model):
