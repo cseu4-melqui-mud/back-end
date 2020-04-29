@@ -36,10 +36,9 @@ def generateWorld(request):
                 x=x,
                 y=y)
             # generate a random shape between 1 and 3
-            chosen_type = new_room.randRoom()
+            chosen_type = random.randint(1, 3)
             # save instance of room in database
             new_room.save()
-            rooms[new_room.id] = new_room
 
             shape_not_found = True
             # while shape is not found iterate
@@ -52,6 +51,7 @@ def generateWorld(request):
                     # new_room.set_connections(y, x)
 
                     # exit loop
+                    new_room.setType(chosen_type)
                     shape_not_found = False
                 # chosen type is equal to 2 [][]
                 if chosen_type == 2:
@@ -73,6 +73,7 @@ def generateWorld(request):
                         # assign to the very next room the same id
                         grid[y][x+1] = new_room.id
                         # exit loop
+                        new_room.setType(chosen_type)
                         shape_not_found = False
                 # if chose type is 3 []
                 #                    []
@@ -93,7 +94,10 @@ def generateWorld(request):
                         # give to the next room the same room id
                         grid[y+1][x] = new_room.id
                         # close while loop
+                        new_room.setType(chosen_type)
                         shape_not_found = False
+
+            rooms[new_room.id] = new_room
 
     def getRoomById(y, x):
         if x >= 0 and x < len(grid) and y >= 0 and y < len(grid):
@@ -112,31 +116,50 @@ def generateWorld(request):
             # if north
             # if room to the north is not outside of grid & two rooms don't share same id
             if (y - 1) >= 0 and north_room is not None:
+                if current_room.n_to != 0:
+                    choice = random.choice([current_room.n_to, north_room.id])
+                    if choice == current_room.n_to:
+                        continue
                 if current_room.id != north_room.id:
                     # if current room has no connection in that direction
                     current_room.connectRooms(north_room, 'n')
                     north_room.connectRooms(current_room, 's')
             # if east
             if (x + 1) < len(grid) and east_room is not None:
+                if current_room.e_to != 0:
+                    choice = random.choice([current_room.e_to, east_room.id])
+                    if choice == current_room.e_to:
+                        continue
                 # if current room has no connection in that direction
                 if current_room.id != east_room.id:
                     current_room.connectRooms(east_room, 'e')
                     east_room.connectRooms(current_room, 'w')
             # if south
             if (y + 1) < len(grid) and south_room is not None:
+                if current_room.s_to != 0:
+                    choice = random.choice([current_room.s_to, south_room.id])
+                    if choice == current_room.s_to:
+                        continue
                 # if current room has no connection in that direction
                 if current_room.id != south_room.id:
                     current_room.connectRooms(south_room, 's')
                     south_room.connectRooms(current_room, 'n')
+
             # if west
             if (x - 1) >= 0 and west_room is not None:
                 # if current room has no connection in that direction
+                if current_room.w_to != 0:
+                    choice = random.choice([current_room.w_to, west_room.id])
+                    if choice == current_room.w_to:
+                        continue
+
                 if current_room.id != west_room.id:
                     current_room.connectRooms(west_room, 'w')
                     west_room.connectRooms(current_room, 'e')
 
     # return grid in response
-    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data}, safe=True)
+    allRooms = RoomSerializer(Room.objects.all(), many=True).data
+    return JsonResponse({'map': grid, 'rooms': allRooms, 'number': len(allRooms)},  safe=True)
 
 
 @csrf_exempt
