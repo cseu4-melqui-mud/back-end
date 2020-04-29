@@ -79,8 +79,8 @@ def generateWorld(request):
                 if chosen_type == 3:
                     # if y axis + 1 is within grid or not
                     # and if is within grid x axis or not
-                    if (new_room.y + 1) > (len(grid) - 1)
-                       if (new_room.y + 1) > (len(grid) - 1):
+                    if (new_room.y + 1) > (len(grid) - 1):
+                        if (new_room.y + 1) > (len(grid) - 1):
                             # if not available in both direction
                             # then chose 1 (single cell)
                             chosen_type = 1
@@ -95,7 +95,7 @@ def generateWorld(request):
                         # close while loop
                         shape_not_found = False
 
-    def getRoomById(y,x):
+    def getRoomById(y, x):
         if x >= 0 and x < len(grid) and y >= 0 and y < len(grid):
             room_id = grid[y][x]
             return rooms[room_id]
@@ -103,40 +103,40 @@ def generateWorld(request):
 
     for y in range(len(grid)):
         for x in range(len(grid)):
-            current_room = getRoomById(y,x)
-            north_room = getRoomById(y - 1,x) # -1, 0
-            east_room = getRoomById(y,x + 1)
-            south_room = getRoomById(y + 1,x)
-            west_room = getRoomById(y,x - 1)
-            
+            current_room = getRoomById(y, x)
+            north_room = getRoomById(y - 1, x)  # -1, 0
+            east_room = getRoomById(y, x + 1)
+            south_room = getRoomById(y + 1, x)
+            west_room = getRoomById(y, x - 1)
+
             # if north
             # if room to the north is not outside of grid & two rooms don't share same id
             if (y - 1) >= 0 and north_room is not None:
                 if current_room.id != north_room.id:
-                # if current room has no connection in that direction  
+                    # if current room has no connection in that direction
                     current_room.connectRooms(north_room, 'n')
-                    north_room.connectRooms(current_room, 's')  
+                    north_room.connectRooms(current_room, 's')
             # if east
-            if (x + 1) < len(grid) and east_room is not None: 
-                # if current room has no connection in that direction 
+            if (x + 1) < len(grid) and east_room is not None:
+                # if current room has no connection in that direction
                 if current_room.id != east_room.id:
                     current_room.connectRooms(east_room, 'e')
-                    east_room.connectRooms(current_room, 'w')  
+                    east_room.connectRooms(current_room, 'w')
             # if south
             if (y + 1) < len(grid) and south_room is not None:
-                # if current room has no connection in that direction 
-                if current_room.id != south_room.id: 
+                # if current room has no connection in that direction
+                if current_room.id != south_room.id:
                     current_room.connectRooms(south_room, 's')
-                    south_room.connectRooms(current_room, 'n')  
+                    south_room.connectRooms(current_room, 'n')
             # if west
-            if (x - 1) >= 0 and west_room is not None: 
-                # if current room has no connection in that direction  
+            if (x - 1) >= 0 and west_room is not None:
+                # if current room has no connection in that direction
                 if current_room.id != west_room.id:
                     current_room.connectRooms(west_room, 'w')
-                    west_room.connectRooms(current_room, 'e')   
+                    west_room.connectRooms(current_room, 'e')
 
-    # return grid in response         
-    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data }, safe=True)
+    # return grid in response
+    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data}, safe=True)
 
 
 @csrf_exempt
@@ -148,7 +148,7 @@ def initialize(request):
     uuid = player.uuid
     room = player.room()
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players}, safe=True)
 # @csrf_exempt
 @api_view(["POST"])
 def move(request):
@@ -180,10 +180,10 @@ def move(request):
         #     pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has walked {dirs[direction]}.'})
         # for p_uuid in nextPlayerUUIDs:
         #     pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
-        return JsonResponse({'name': player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'error_msg':""}, safe=True)
+        return JsonResponse({'name': player.user.username, 'title': nextRoom.title, 'description': nextRoom.description, 'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
-        return JsonResponse({'name': player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
+        return JsonResponse({'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
 
 
 @csrf_exempt
