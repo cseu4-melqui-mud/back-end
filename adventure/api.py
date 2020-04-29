@@ -8,7 +8,6 @@ from .models import *
 from rest_framework.decorators import api_view
 from .serializer import RoomSerializer
 import json
-
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
@@ -18,7 +17,6 @@ def generateWorld(request):
     Room.objects.all().delete()
     # generate grid size 14 * 14
     grid = [0] * 14
-
     for i in range(14):
         grid[i] = [0] * 14
 
@@ -31,7 +29,6 @@ def generateWorld(request):
             if grid[y][x] != 0:
                 # move to the next cell
                 continue
-
             # create new instance of room
             new_room = Room(
                 title="Outside Cave Entrance",
@@ -40,14 +37,13 @@ def generateWorld(request):
                 y=y)
             # generate a random shape between 1 and 3
             chosen_type = new_room.randRoom()
-
             # save instance of room in database
             new_room.save()
             rooms[new_room.id] = new_room
 
             shape_not_found = True
             # while shape is not found iterate
-            while shape_not_found:                
+            while shape_not_found:
                 # if chosen type is 1
                 if chosen_type == 1:
                     # place on grid the room id
@@ -57,13 +53,12 @@ def generateWorld(request):
 
                     # exit loop
                     shape_not_found = False
-
                 # chosen type is equal to 2 [][]
-                if chosen_type == 2:   
-                    # check if next cell is available               
-                    if (new_room.x + 1) > (len(grid) - 1):  
+                if chosen_type == 2:
+                    # check if next cell is available
+                    if (new_room.x + 1) > (len(grid) - 1):
                         # if not available on x axis, then check
-                        # if avaiable on y axis   
+                        # if avaiable on y axis
                         if (new_room.y + 1) > (len(grid) - 1):
                             # if not available then just use 1 (single cell)
                             chosen_type = 1
@@ -79,20 +74,19 @@ def generateWorld(request):
                         grid[y][x+1] = new_room.id
                         # exit loop
                         shape_not_found = False
-
                 # if chose type is 3 []
                 #                    []
                 if chosen_type == 3:
                     # if y axis + 1 is within grid or not
-                    if (new_room.y + 1) > (len(grid) -1 ):
-                        # and if is within grid x axis or not
-                        if (new_room.y + 1) > (len(grid) - 1):
+                    # and if is within grid x axis or not
+                    if (new_room.y + 1) > (len(grid) - 1)
+                       if (new_room.y + 1) > (len(grid) - 1):
                             # if not available in both direction
                             # then chose 1 (single cell)
                             chosen_type = 1
                         else:
                             chosen_type = 2
-                    # if within 
+                    # if within
                     else:
                         # place room in grid
                         grid[y][x] = new_room.id
@@ -154,13 +148,11 @@ def initialize(request):
     uuid = player.uuid
     room = player.room()
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
-
-
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
 # @csrf_exempt
 @api_view(["POST"])
 def move(request):
-    dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
+    dirs = {"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
     player = request.user.player
     player_id = player.id
@@ -179,7 +171,7 @@ def move(request):
         nextRoomID = room.w_to
     if nextRoomID is not None and nextRoomID > 0:
         nextRoom = Room.objects.get(id=nextRoomID)
-        player.currentRoom=nextRoomID
+        player.currentRoom = nextRoomID
         player.save()
         players = nextRoom.playerNames(player_id)
         currentPlayerUUIDs = room.playerUUIDs(player_id)
@@ -188,14 +180,14 @@ def move(request):
         #     pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has walked {dirs[direction]}.'})
         # for p_uuid in nextPlayerUUIDs:
         #     pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
-        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'error_msg':""}, safe=True)
+        return JsonResponse({'name': player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'error_msg':""}, safe=True)
     else:
         players = room.playerNames(player_id)
-        return JsonResponse({'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
+        return JsonResponse({'name': player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
 
 
 @csrf_exempt
 @api_view(["POST"])
 def say(request):
     # IMPLEMENT
-    return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
+    return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
