@@ -10,6 +10,8 @@ from .serializer import RoomSerializer
 import json
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
+
+
 @api_view(["GET"])
 def generateWorld(request):
     Room.objects.all().delete()
@@ -17,6 +19,7 @@ def generateWorld(request):
     grid = [0] * 14
     for i in range(14):
         grid[i] = [0] * 14
+
     rooms = dict()
     # iterating over each column
     for y in range(0, len(grid)):
@@ -37,6 +40,7 @@ def generateWorld(request):
             # save instance of room in database
             new_room.save()
             rooms[new_room.id] = new_room
+
             shape_not_found = True
             # while shape is not found iterate
             while shape_not_found:
@@ -44,7 +48,9 @@ def generateWorld(request):
                 if chosen_type == 1:
                     # place on grid the room id
                     grid[y][x] = new_room.id
+
                     # new_room.set_connections(y, x)
+
                     # exit loop
                     shape_not_found = False
                 # chosen type is equal to 2 [][]
@@ -88,47 +94,49 @@ def generateWorld(request):
                         grid[y+1][x] = new_room.id
                         # close while loop
                         shape_not_found = False
-    def getRoomById(y, x):
+
+    def getRoomById(y,x):
         if x >= 0 and x < len(grid) and y >= 0 and y < len(grid):
             room_id = grid[y][x]
             return rooms[room_id]
         return None
+
     for y in range(len(grid)):
         for x in range(len(grid)):
-            current_room = getRoomById(y, x)
-            # if current_room is None:
-            #     continue
-            north_room = getRoomById(y - 1, x) # -1, 0
-            east_room = getRoomById(y, x + 1)
-            south_room = getRoomById(y + 1, x)
-            west_room = getRoomById(y, x - 1)
+            current_room = getRoomById(y,x)
+            north_room = getRoomById(y - 1,x) # -1, 0
+            east_room = getRoomById(y,x + 1)
+            south_room = getRoomById(y + 1,x)
+            west_room = getRoomById(y,x - 1)
+            
             # if north
             # if room to the north is not outside of grid & two rooms don't share same id
             if (y - 1) >= 0 and north_room is not None:
                 if current_room.id != north_room.id:
-                # if current room has no connection in that direction
+                # if current room has no connection in that direction  
                     current_room.connectRooms(north_room, 'n')
-                    north_room.connectRooms(current_room, 's')
+                    north_room.connectRooms(current_room, 's')  
             # if east
-            if (x + 1) < len(grid) and east_room is not None:
-                # if current room has no connection in that direction
+            if (x + 1) < len(grid) and east_room is not None: 
+                # if current room has no connection in that direction 
                 if current_room.id != east_room.id:
                     current_room.connectRooms(east_room, 'e')
-                    east_room.connectRooms(current_room, 'w')
+                    east_room.connectRooms(current_room, 'w')  
             # if south
             if (y + 1) < len(grid) and south_room is not None:
-                # if current room has no connection in that direction
-                if current_room.id != south_room.id:
+                # if current room has no connection in that direction 
+                if current_room.id != south_room.id: 
                     current_room.connectRooms(south_room, 's')
-                    south_room.connectRooms(current_room, 'n')
+                    south_room.connectRooms(current_room, 'n')  
             # if west
-            if (x - 1) >= 0 and west_room is not None:
-                # if current room has no connection in that direction
+            if (x - 1) >= 0 and west_room is not None: 
+                # if current room has no connection in that direction  
                 if current_room.id != west_room.id:
                     current_room.connectRooms(west_room, 'w')
-                    west_room.connectRooms(current_room, 'e')
-    # return grid in response
-    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data}, safe=True)
+                    west_room.connectRooms(current_room, 'e')   
+
+    # return grid in response         
+    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data }, safe=True)
 
 
 @csrf_exempt
