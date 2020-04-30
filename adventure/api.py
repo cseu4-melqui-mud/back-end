@@ -248,8 +248,7 @@ def rooms(request):
         if room.room_type == 3:
             grid[room.y+1][room.x] = room.id
 
-    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data},  safe=True)
-
+    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data}, safe=True)
 
 @csrf_exempt
 @api_view(["GET"])
@@ -260,12 +259,7 @@ def initialize(request):
     uuid = player.uuid
     room = player.room()
     players = room.playerNames(player_id)
-    return JsonResponse({
-      'uuid': uuid,
-      'name': player.user.username,
-      'room': RoomSerializer(room).data,
-      'players': players
-      }, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'room': RoomSerializer(room).data, 'players': players}, safe=True) 
 
 # @csrf_exempt
 @api_view(["POST"])
