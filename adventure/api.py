@@ -13,6 +13,9 @@ import json
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
+def randomSeeded(): 
+  random.seed(32)
+  return random
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -108,7 +111,7 @@ def generateWorld(request):
 
             new_room.description = genDescr(new_room.title)
 
-            # generate a random shape between 1 and 3
+            # generate a randomSeeded shape between 1 and 3
             chosen_type = random.randint(1, 3)
             # save instance of room in database
             new_room.save()
@@ -181,54 +184,76 @@ def generateWorld(request):
     for y in range(len(grid)):
         for x in range(len(grid)):
             current_room = getRoomById(y, x)
-            north_room = getRoomById(y - 1, x)  # -1, 0
+            north_room = getRoomById(y - 1, x)
             east_room = getRoomById(y, x + 1)
             south_room = getRoomById(y + 1, x)
             west_room = getRoomById(y, x - 1)
 
             # if north
             # if room to the north is not outside of grid & two rooms don't share same id
-            if (y - 1) >= 0 and north_room is not None:
+            allowConnection = True
+            if (y - 1) >= 0 and north_room is not None and north_room.s_to == 0:
                 if current_room.n_to != 0:
                     choice = random.choice([current_room.n_to, north_room.id])
                     if choice == current_room.n_to:
-                        continue
-                if current_room.id != north_room.id:
-                    # if current room has no connection in that direction
+                        allowConnection = False
+                    else:
+                        # remove connection from previows room
+                        rooms[current_room.n_to] = rooms[current_room.n_to].removeConnection('s')
+                        print('removed south from room to the north?', rooms[current_room.n_to].s_to)
+                # if current room has no connection in that direction
+                if current_room.id != north_room.id and allowConnection:
                     current_room.connectRooms(north_room, 'n')
                     north_room.connectRooms(current_room, 's')
-            # if east
-            if (x + 1) < len(grid) and east_room is not None:
-                if current_room.e_to != 0:
-                    choice = random.choice([current_room.e_to, east_room.id])
-                    if choice == current_room.e_to:
-                        continue
-                # if current room has no connection in that direction
-                if current_room.id != east_room.id:
-                    current_room.connectRooms(east_room, 'e')
-                    east_room.connectRooms(current_room, 'w')
+                allowConnection = True
+
             # if south
-            if (y + 1) < len(grid) and south_room is not None:
+            if (y + 1) < len(grid) and south_room is not None and south_room.n_to == 0:
                 if current_room.s_to != 0:
                     choice = random.choice([current_room.s_to, south_room.id])
                     if choice == current_room.s_to:
-                        continue
+                        allowConnection = False
+                    else:
+                        # remove connection from previows room
+                        rooms[current_room.s_to] = rooms[current_room.s_to].removeConnection('n')
+                        print('removed north from room to the south?', rooms[current_room.s_to].n_to)
                 # if current room has no connection in that direction
-                if current_room.id != south_room.id:
+                if current_room.id != south_room.id and allowConnection:
                     current_room.connectRooms(south_room, 's')
                     south_room.connectRooms(current_room, 'n')
+                allowConnection = True
+
+            # if east
+            if (x + 1) < len(grid) and east_room is not None and east_room.w_to == 0:
+                if current_room.e_to != 0:
+                    choice = random.choice([current_room.e_to, east_room.id])
+                    if choice == current_room.e_to:
+                        allowConnection = False
+                    else:
+                        # remove connection from previows room
+                        rooms[current_room.e_to] = rooms[current_room.e_to].removeConnection('w')
+                        print('removed west from room to the east?', rooms[current_room.e_to].w_to)
+                # if current room has no connection in that direction
+                if current_room.id != east_room.id and allowConnection:
+                    current_room.connectRooms(east_room, 'e')
+                    east_room.connectRooms(current_room, 'w')
+                allowConnection = True
 
             # if west
-            if (x - 1) >= 0 and west_room is not None:
-                # if current room has no connection in that direction
+            if (x - 1) >= 0 and west_room is not None and west_room.e_to == 0:
                 if current_room.w_to != 0:
                     choice = random.choice([current_room.w_to, west_room.id])
                     if choice == current_room.w_to:
-                        continue
-
-                if current_room.id != west_room.id:
+                        allowConnection = False
+                    else:
+                        # remove connection from previows room
+                        rooms[current_room.w_to] = rooms[current_room.w_to].removeConnection('e')
+                        print('removed east from room to the west?', rooms[current_room.w_to].e_to)
+                # if current room has no connection in that direction
+                if current_room.id != west_room.id and allowConnection:
                     current_room.connectRooms(west_room, 'w')
                     west_room.connectRooms(current_room, 'e')
+                allowConnection = True
 
     # return grid in response
     allRooms = RoomSerializer(Room.objects.all(), many=True).data

@@ -53,12 +53,22 @@ class Room(models.Model):
         self.room_type = roomType
         self.save()
 
-    def randRoom(self):
-        # choose a random number to assign between 0, 3
-        self.type = random.randint(1, 3)
-        # and return
+    def removeConnection(self, direction):
+        #print(f'removing from {self.id}.{direction}_to => n{self.n_to},e{self.e_to},s{self.s_to},w{self.w_to}')
+        if direction == "n":
+            self.n_to = 0
+        elif direction == "s":
+            self.s_to = 0
+        elif direction == "e":
+            self.e_to = 0
+        elif direction == "w":
+            self.w_to = 0
+        else:
+            print("Invalid direction")
+            return
         self.save()
-        return self.type
+        print(f'removed? {self.id}.{direction}_to => n{self.n_to},e{self.e_to},s{self.s_to},w{self.w_to}')
+        return self
 
 
 class Player(models.Model):
@@ -79,7 +89,6 @@ class Player(models.Model):
             self.save()
             self.initialize()
             return self.room()
-
 
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
