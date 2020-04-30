@@ -137,14 +137,17 @@ def generateWorld(request):
                             # change shape to num 3
                             chosen_type = 3
                     # if is available
-                    else:
+                    elif grid[y][x+1] == 0:
                         # place room in grid
                         grid[y][x] = new_room.id
                         # assign to the very next room the same id
                         grid[y][x+1] = new_room.id
                         # exit loop
-                        new_room.setType(chosen_type)
+                        new_room.setType(2)
                         shape_not_found = False
+                    else:
+                        chosen_type = 1
+
                 # if chose type is 3 []
                 #                    []
                 if chosen_type == 3:
