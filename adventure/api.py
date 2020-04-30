@@ -5,7 +5,9 @@ from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
 from .models import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import permissions
 from .serializer import RoomSerializer
 import json
 # instantiate pusher
@@ -13,6 +15,7 @@ import json
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def generateWorld(request):
     Room.objects.all().delete()
     # generate grid size 14 * 14
@@ -234,6 +237,7 @@ def generateWorld(request):
 
 @csrf_exempt
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def rooms(request):
     allRooms = Room.objects.all()
 
@@ -252,6 +256,7 @@ def rooms(request):
 
 @csrf_exempt
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def initialize(request):
     user = request.user
     player = user.player
@@ -263,6 +268,7 @@ def initialize(request):
 
 # @csrf_exempt
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def move(request):
     dirs = {"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
@@ -300,6 +306,7 @@ def move(request):
 
 @csrf_exempt
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def say(request):
     # IMPLEMENT
     return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
