@@ -10,7 +10,7 @@ import random
 class Room(models.Model):
     title = models.CharField(max_length=50, default="DEFAULT TITLE")
     description = models.CharField(
-        max_length=500, default="DEFAULT DESCRIPTION")
+        max_length=1000, default="DEFAULT DESCRIPTION")
     # add other columns for both x and y axis
     x = models.IntegerField(default=0)
     y = models.IntegerField(default=0)

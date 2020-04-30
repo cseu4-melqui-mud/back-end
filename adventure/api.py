@@ -151,7 +151,7 @@ def generateWorld(request):
                     # if y axis + 1 is within grid or not
                     # and if is within grid x axis or not
                     if (new_room.y + 1) > (len(grid) - 1):
-                        if (new_room.y + 1) > (len(grid) - 1):
+                        if (new_room.x + 1) > (len(grid) - 1):
                             # if not available in both direction
                             # then chose 1 (single cell)
                             chosen_type = 1
