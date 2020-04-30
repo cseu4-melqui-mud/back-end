@@ -301,7 +301,7 @@ def move(request):
         return JsonResponse({'name': player.user.username, 'room': RoomSerializer(nextRoom).data, 'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
-        return JsonResponse({'name': player.user.username, , 'room': RoomSerializer(nextRoom).data, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
+        return JsonResponse({'name': player.user.username, 'room': RoomSerializer(nextRoom).data, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
 
 
 @csrf_exempt
