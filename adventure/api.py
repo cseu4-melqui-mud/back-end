@@ -164,6 +164,25 @@ def generateWorld(request):
 
 @csrf_exempt
 @api_view(["GET"])
+def rooms(request):
+    allRooms = Room.objects.all()
+
+    grid = [0] * 14
+    for i in range(14):
+        grid[i] = [0] * 14
+
+    for room in allRooms:
+        grid[room.y][room.x] = room.id
+        if room.room_type == 2:
+            grid[room.y][room.x+1] = room.id
+        if room.room_type == 3:
+            grid[room.y+1][room.x] = room.id
+
+    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data},  safe=True)
+
+
+@csrf_exempt
+@api_view(["GET"])
 def initialize(request):
     user = request.user
     player = user.player
