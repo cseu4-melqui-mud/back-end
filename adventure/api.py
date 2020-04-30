@@ -120,9 +120,6 @@ def generateWorld(request):
                 if chosen_type == 1:
                     # place on grid the room id
                     grid[y][x] = new_room.id
-
-                    # new_room.set_connections(y, x)
-
                     # exit loop
                     new_room.setType(chosen_type)
                     shape_not_found = False
@@ -266,7 +263,7 @@ def initialize(request):
     players = room.playerNames(player_id)
     return JsonResponse({'uuid': uuid, 'name': player.user.username, 'room': RoomSerializer(room).data, 'players': players}, safe=True) 
 
-# @csrf_exempt
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def move(request):

@@ -75,6 +75,8 @@ class Player(models.Model):
         try:
             return Room.objects.get(id=self.currentRoom)
         except Room.DoesNotExist:
+            self.currentRoom = 0
+            self.save()
             self.initialize()
             return self.room()
 
