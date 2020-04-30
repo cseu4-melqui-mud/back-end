@@ -55,9 +55,7 @@ def generateWorld(request):
             "Avernus"
         ]
 
-        chosen_title = random.choice(titles)
-
-        return chosen_title
+        return random.choice(titles)
     
     def genDescr(title):
         list1 = ["A grand", "A large", "A massive", "A minor", "A modest", "A narrow", "A short", "A small", "A tall", "A wide"]
