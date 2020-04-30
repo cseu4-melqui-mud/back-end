@@ -5,7 +5,9 @@ from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
 from .models import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import permissions
 from .serializer import RoomSerializer
 import json
 # instantiate pusher
@@ -14,6 +16,7 @@ pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config(
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def generateWorld(request):
     Room.objects.all().delete()
     # generate grid size 14 * 14
@@ -139,9 +142,6 @@ def generateWorld(request):
                 if chosen_type == 1:
                     # place on grid the room id
                     grid[y][x] = new_room.id
-
-                    # new_room.set_connections(y, x)
-
                     # exit loop
                     new_room.setType(chosen_type)
                     shape_not_found = False
@@ -159,14 +159,17 @@ def generateWorld(request):
                             # change shape to num 3
                             chosen_type = 3
                     # if is available
-                    else:
+                    elif grid[y][x+1] == 0:
                         # place room in grid
                         grid[y][x] = new_room.id
                         # assign to the very next room the same id
                         grid[y][x+1] = new_room.id
                         # exit loop
-                        new_room.setType(chosen_type)
+                        new_room.setType(2)
                         shape_not_found = False
+                    else:
+                        chosen_type = 1
+
                 # if chose type is 3 []
                 #                    []
                 if chosen_type == 3:
@@ -256,6 +259,7 @@ def generateWorld(request):
 
 @csrf_exempt
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def rooms(request):
     allRooms = Room.objects.all()
 
@@ -270,11 +274,12 @@ def rooms(request):
         if room.room_type == 3:
             grid[room.y+1][room.x] = room.id
 
-    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data},  safe=True)
+    return JsonResponse({'map': grid, 'rooms': RoomSerializer(Room.objects.all(), many=True).data}, safe=True)
 
 
 @csrf_exempt
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def initialize(request):
     user = request.user
     player = user.player
@@ -282,9 +287,12 @@ def initialize(request):
     uuid = player.uuid
     room = player.room()
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players}, safe=True)
-# @csrf_exempt
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'room': RoomSerializer(room).data, 'players': players}, safe=True)
+
+
+@csrf_exempt
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def move(request):
     dirs = {"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
@@ -319,14 +327,16 @@ def move(request):
         return JsonResponse({'name': player.user.username, 'title': nextRoom.title, 'description': nextRoom.description, 'players': players, 'error_msg': ""}, safe=True)
     else:
         players = room.playerNames(player_id)
-        return JsonResponse({'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
+        return JsonResponse({'name': player.user.username, , 'room': RoomSerializer(nextRoom).data, 'players': players, 'error_msg': "You cannot move that way."}, safe=True)
 
 
 @csrf_exempt
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def say(request):
     # IMPLEMENT
-    message = request.message
+    data = json.loads(request.body)
+    message = data.message
     player = request.user.player
     room = player.room()
     currentPlayerUUIDs = room.playerUUIDs(player_id)
