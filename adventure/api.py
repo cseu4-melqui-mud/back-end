@@ -217,6 +217,10 @@ def generateWorld(request):
                         continue
                 if current_room.id != north_room.id:
                     # if current room has no connection in that direction
+                    if current_room.n_to != 0:
+                        old_connection = getRoomById(y-1, x)
+                        old_connection.s_to = 0
+                        old_connection.save()
                     current_room.connectRooms(north_room, 'n')
                     north_room.connectRooms(current_room, 's')
             # if east
@@ -227,6 +231,10 @@ def generateWorld(request):
                         continue
                 # if current room has no connection in that direction
                 if current_room.id != east_room.id:
+                    if current_room.e_to != 0:
+                        old_connection = getRoomById(y, x-1)
+                        old_connection.w_to = 0
+                        old_connection.save()
                     current_room.connectRooms(east_room, 'e')
                     east_room.connectRooms(current_room, 'w')
             # if south
@@ -237,6 +245,10 @@ def generateWorld(request):
                         continue
                 # if current room has no connection in that direction
                 if current_room.id != south_room.id:
+                    if current_room.s_to != 0:
+                        old_connection = getRoomById(y+1, x)
+                        old_connection.n_to = 0
+                        old_connection.save()
                     current_room.connectRooms(south_room, 's')
                     south_room.connectRooms(current_room, 'n')
 
@@ -249,6 +261,10 @@ def generateWorld(request):
                         continue
 
                 if current_room.id != west_room.id:
+                    if current_room.w_to != 0:
+                        old_connection = getRoomById(y, x+1)
+                        old_connection.e_to = 0
+                        old_connection.save()
                     current_room.connectRooms(west_room, 'w')
                     west_room.connectRooms(current_room, 'e')
 
