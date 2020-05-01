@@ -203,54 +203,43 @@ def generateWorld(request):
     for y in range(len(grid)):
         for x in range(len(grid)):
             current_room = getRoomById(y, x)
-            north_room = getRoomById(y - 1, x)  # -1, 0
+            north_room = getRoomById(y - 1, x)
             east_room = getRoomById(y, x + 1)
             south_room = getRoomById(y + 1, x)
             west_room = getRoomById(y, x - 1)
 
             # if north
-            # if room to the north is not outside of grid & two rooms don't share same id
-            if (y - 1) >= 0 and north_room is not None:
-                if current_room.n_to != 0:
-                    choice = random.choice([current_room.n_to, north_room.id])
-                    if choice == current_room.n_to:
-                        continue
-                if current_room.id != north_room.id:
-                    # if current room has no connection in that direction
-                    current_room.connectRooms(north_room, 'n')
-                    north_room.connectRooms(current_room, 's')
+            if north_room is not None and current_room.id != north_room.id and current_room.n_to == 0 and north_room.s_to == 0:
+
+                rooms[current_room.id] = current_room.connectRooms(
+                    north_room, 'n')
+                rooms[north_room.id] = north_room.connectRooms(
+                    current_room, 's')
             # if east
-            if (x + 1) < len(grid) and east_room is not None:
-                if current_room.e_to != 0:
-                    choice = random.choice([current_room.e_to, east_room.id])
-                    if choice == current_room.e_to:
-                        continue
-                # if current room has no connection in that direction
-                if current_room.id != east_room.id:
-                    current_room.connectRooms(east_room, 'e')
-                    east_room.connectRooms(current_room, 'w')
+            if east_room is not None and current_room.id != east_room.id and current_room.e_to == 0 and east_room.w_to == 0:
+                rooms[current_room.id] = current_room.connectRooms(
+                    east_room, 'e')
+                rooms[east_room.id] = east_room.connectRooms(current_room, 'w')
             # if south
-            if (y + 1) < len(grid) and south_room is not None:
-                if current_room.s_to != 0:
-                    choice = random.choice([current_room.s_to, south_room.id])
-                    if choice == current_room.s_to:
-                        continue
-                # if current room has no connection in that direction
-                if current_room.id != south_room.id:
-                    current_room.connectRooms(south_room, 's')
-                    south_room.connectRooms(current_room, 'n')
 
+            """
+
+            3
+            3 1
+            2 2
+
+
+            """
+            if south_room is not None and current_room.id != south_room.id and current_room.s_to == 0 and south_room.n_to == 0:
+                rooms[current_room.id] = current_room.connectRooms(
+                    south_room, 's')
+                rooms[south_room.id] = south_room.connectRooms(
+                    current_room, 'n')
             # if west
-            if (x - 1) >= 0 and west_room is not None:
-                # if current room has no connection in that direction
-                if current_room.w_to != 0:
-                    choice = random.choice([current_room.w_to, west_room.id])
-                    if choice == current_room.w_to:
-                        continue
-
-                if current_room.id != west_room.id:
-                    current_room.connectRooms(west_room, 'w')
-                    west_room.connectRooms(current_room, 'e')
+            if west_room is not None and current_room.id != west_room.id and current_room.w_to == 0 and west_room.e_to == 0:
+                rooms[current_room.id] = current_room.connectRooms(
+                    west_room, 'w')
+                rooms[west_room.id] = west_room.connectRooms(current_room, 'e')
 
     # return grid in response
     allRooms = RoomSerializer(Room.objects.all(), many=True).data

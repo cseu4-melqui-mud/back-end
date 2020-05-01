@@ -42,6 +42,7 @@ class Room(models.Model):
                 print("Invalid direction")
                 return
             self.save()
+            return self
 
     def playerNames(self, currentPlayerID):
         return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
